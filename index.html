@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cubie</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .chat-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0;
+            margin: 0;
+            
+        }
+
+        .chat-banner {
+            width: 100%;
+            background: linear-gradient(to right, rgb(102, 223, 232), #245aa7);
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-weight: bold;
+            padding-left: 30px;
+            margin-top: 0;
+        }
+
+        .chat-banner img {
+            height: 50px;
+            margin-right: 10px;
+        }
+
+        .chat-banner span {
+            font-size: 2em;
+        }
+
+        #chatbox {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 160px); 
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            padding-bottom: 60px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 50px;
+        }
+
+        .user-message {
+            text-align: right;
+            color: white;
+            background-color: #27589c;
+            display: inline-block;
+            padding: 10px;
+            border-radius: 20px;
+            margin: 10px;
+            align-self: flex-end;
+            margin-bottom: 10px;
+        }
+
+        .bot-message {
+            text-align: left;
+            color: black;
+            background-color: #c4c4c4;
+            display: inline-block;
+            padding: 10px;
+            border-radius: 20px;
+            margin: 10px;
+            align-self: flex-start;
+        }
+        .intro-message {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            color: black;
+            background-color: #c4c4c4;
+            display: inline-block;
+            border-radius: 20px;
+            margin: 10px;
+            align-self: flex-start;
+            text-align: left;
+            padding: 15px;
+         }
+
+         .feedback-buttons-container {
+            display: flex;
+            justify-content: flex-end;
+            text-align: right;
+        }
+
+        .feedback-button {
+        margin-left: 10px;
+        }
+         
+        .floating-buttons-container{
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            margin-top: 10px;
+            margin-left: auto;
+        }
+
+        .floating-buttons {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .floating-button {
+            background-color: transparent;
+            color: #00aaff;
+            border: 2px solid #00aaff;
+            border-radius: 25px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .floating-button:hover {
+            background-color: #00aaff;
+            color: white;
+        }
+
+        .chatbox-wrapper {
+            position: relative;
+        }
+
+        .icon {
+            position: absolute;
+            top: 10px; /* Adjust the position of the icon vertically */
+            left: 10px; /* Adjust the position of the icon horizontally */
+            width: 30px; /* Adjust the width of the icon as needed */
+            height: 30px; /* Adjust the height of the icon as needed */
+         }
+
+        #userInput {
+            position: sticky; 
+            bottom: 0;
+            background-color: #fff;
+            width: calc(100% - 40px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 0 0 10px 10px;
+            height: 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: -10px;
+        }
+
+        #userInput input {
+            width: 82%;
+            height: 100%;
+            border: none;
+            padding: 5px;
+            border-radius: 10px;
+            position: sticky;
+            bottom: 0;
+            position: sticky;
+        }
+
+        #userInput button {
+            height: 100%;
+            width: 15%;
+            background-color: #27589c;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            margin-left: 3%;
+        }
+
+        .typing-indicator {
+            text-align: left;
+            color: black;
+            display: inline-block;
+            padding: 10px;
+            margin: 10px;
+            align-self: flex-start;
+        }
+
+        .typing-indicator span {
+            background-color: #333;
+            height: 6px;
+            width: 6px;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 1px;
+            opacity: 0;
+            animation: typing-indicator 1.5s infinite;
+        }
+
+       
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing-indicator {
+            0% {
+              opacity: 0;
+            }
+            50% {
+              opacity: 1;
+            }
+            100% {
+              opacity: 0;
+            }
+        }
+    </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+       $(document).ready(function(){
+            displayTypingIndicatorAndIntro();
+
+            function displayTypingIndicatorAndIntro(){
+                var typingHtml = '<p class="typing-indicator"><span></span><span></span><span></span></p>';
+                $("#chatbox").append(typingHtml);
+                $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
+                
+        
+                setTimeout(function() {
+                    $(".typing-indicator").remove();
+                    var introHtml = '<p class="intro-message"><span>Hello!👋 I\'m Cubie, your customer service assistant. How can I assist you today? You can ask me about navigating this application, tracking your packages, seeing dispute status, and other information regarding your freight process..</span></p>';
+                    $("#chatbox").append(introHtml);
+                    createFloatingButtons();
+                   $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight)
+                },2000);
+            
+            }
+
+            function createFloatingButtons() {
+            var buttonsHtml = `
+            <div class="floating-buttons-container">
+                <button id=button1 class="floating-button">Track Package</button>
+                <button id=button2 class="floating-button">Get Dispute Info</button>
+                <button id=button3 class="floating-button">Invoice Status</button>
+                <button id=button4 class="floating-button">Navigation</button>
+                <button id=button5 class="floating-button">Other</button>
+            </div>
+        `;
+        $("#chatbox").append(buttonsHtml);
+        $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
+    
+        
+
+    $("#button1").click(function() {
+            // Action for Button 1
+            // For example, display a message when Button 1 is clicked
+            var messageHtml = '<p class="bot-message"><span>"Please type tracking number followed by the actual tracking number so I can correctly fetch your data!😊"</span></p>';
+            messageHtml += '<div class="feedback-buttons-container">';
+            messageHtml += '<button class="feedback-button" onclick="handleFeedback(\'👍\')">👍</button>';
+            messageHtml += '<button class="feedback-button" onclick="handleFeedback(\'👎\')">👎</button>';
+            messageHtml += '</div>';
+            $("#chatbox").append(messageHtml);
+            $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
+        });
+
+        
+        $("#button2").click(function() {
+            // Action for Button 1
+            // For example, display a message when Button 1 is clicked
+            var messageHtml = '<p class="bot-message"><span>"Please type dispute id: followed by the dispute number for the most accurate results 😉"</span></p>';
+            messageHtml += '<div class="feedback-buttons-container">';
+            messageHtml += '<button class="feedback-button" onclick="handleFeedback(\'👍\')">👍</button>';
+            messageHtml += '<button class="feedback-button" onclick="handleFeedback(\'👎\')">👎</button>';
+            messageHtml += '</div>';
+            $("#chatbox").append(messageHtml);
+            $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
+        });
+
+        $("#button3").click(function() {
+            var messageHtml = '<p class="bot-message"><span>"Please type invoice number followed by the invoice number so that I can correctly assist you 😃"</span></p>';
+            messageHtml += '<div class="feedback-buttons-container">';
+            messageHtml += '<button class="feedback-button" onclick="handleFeedback(\'👍\')">👍</button>';
+            messageHtml += '<button class="feedback-button" onclick="handleFeedback(\'👎\')">👎</button>';
+            messageHtml += '</div>';
+            $("#chatbox").append(messageHtml);
+            $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
+        });
+
+        $("#button4").click(function() {
+            var messageHtml = '<p class="bot-message"><span>Please provide a few details about your navigation inquiry. You can ask me about the purpose of different cubes within the application and how to perform your desired actions!</span></p>';
+            messageHtml += '<div class="feedback-buttons-container">';
+            messageHtml += '<button class="feedback-button" onclick="handleFeedback(\'👍\')">👍</button>';
+            messageHtml += '<button class="feedback-button" onclick="handleFeedback(\'👎\')">👎</button>';
+            messageHtml += '</div>';
+            $("#chatbox").append(messageHtml);
+            $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
+        });
+
+        $("#button5").click(function() {
+            var messageHtml = '<p class="bot-message"><span>Okay, please describe your inquiry</span></p>';
+            messageHtml += '<div class="feedback-buttons-container">';
+            messageHtml += '<button class="feedback-button" onclick="handleFeedback(\'👍\')">👍</button>';
+            messageHtml += '<button class="feedback-button" onclick="handleFeedback(\'👎\')">👎</button>';
+            messageHtml += '</div>';
+            $("#chatbox").append(messageHtml);
+            $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
+        });
+        $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
+
+
+        function handleFeedback(feedback) {
+      fetch('/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'feedback=' + feedback
+      })
+      .then(response => response.text())
+      .then(message => console.log(message))
+      .catch(error => console.error('Error submitting feedback:', error));
+    }
+    }
+    
+    
+    
+            
+         
+            function getBotResponse() {
+                var rawText = $("#textInput").val();
+                var userHtml = '<p class="user-message"><span>' + rawText + '</span></p>';
+                $("#textInput").val("");
+                $("#chatbox").append(userHtml);
+                $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
+
+                var typingHtml = '<p class="typing-indicator"><span></span><span></span><span></span></p>';
+                $("#chatbox").append(typingHtml);
+                $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
+
+                if (rawText.toLowerCase() === "hi") {
+                    setTimeout(function() {
+                        $(".typing-indicator").remove();
+                        var hiResponse = '<p class="bot-message"><span>Hi there! What can Cubie do for you today?</span></p>';
+                        $("#chatbox").append(hiResponse);
+                        $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
+                    }, 500);
+                } else {
+                    setTimeout(function() { // Add a 3-second delay before fetching bot response
+                        $.get("/get", { msg: rawText }).done(function(data) {
+                            $(".typing-indicator").remove();
+                            var botHtml = '<p class="bot-message"><span>' + data + '</span></p>';
+                            $("#chatbox").append(botHtml);
+                            $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
+                        });
+                    }, 3000);
+                }
+            }
+
+            $("#textInput").keypress(function(e) {
+                if(e.which == 13) {
+                    getBotResponse();
+                }
+            });
+
+            $("#buttonInput").click(function() {
+                getBotResponse();
+            });
+
+            // Function to create and append floating buttons
+            /*function createFloatingButtons() {
+                const buttons = [
+                    { text: "Track Package", action: "track" },
+                    { text: "Get Dispute Info", action: "dispute" },
+                    { text: "Invoice Status", action: "invoice" },
+                    { text: "Navigation", action: "navigation" },
+                    { text: "Other", action: "other" }
+                ];
+
+                buttons.forEach(button => {
+                    const buttonHtml = `<button class="floating-button" data-action="${button.action}">${button.text}</button>`;
+                    $("#floating-buttons").append(buttonHtml);
+                });
+            }
+
+            // Call the function to create and append the floating buttons
+            //createFloatingButtons();
+
+            // Function to handle button clicks
+            $(".floating-button").click(function() {
+                const action = $(this).attr("data-action");
+                let botResponse;
+
+                switch (action) {
+                    case "track":
+                        botResponse = "Please type 'retrieve' followed by the tracking number.";
+                        break;
+                    case "dispute":
+                        botResponse = "Please type 'dispute id' followed by the dispute number.";
+                        break;
+                    case "invoice":
+                        botResponse = "Please type 'invoice number is' followed by the invoice number.";
+                        break;
+                    case "navigation":
+                        botResponse = "Please provide a few details about your navigation inquiry.";
+                        // Process the input as usual with the 'process_input' function
+                        // and display the response in the chatbox
+                        // For example:
+                        // $.get("/get", { msg: "user input" }).done(function(data) {
+                        //     displayBotMessage(data);
+                        // });
+                        break;
+                    case "other":
+                        botResponse = "Okay, please describe your inquiry.";
+                        // Process the input as usual with the 'process_input' function
+                        // and display the response in the chatbox
+                        // For example:
+                        // $.get("/get", { msg: "user input" }).done(function(data) {
+                        //     displayBotMessage(data);
+                        // });
+                        break;
+                }
+
+                // Display bot's response in the chatbox
+                var botHtml = '<p class="bot-message"><span>' + botResponse + '</span></p>';
+                $("#chatbox").append(botHtml);
+                $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
+            });
+            */
+        });
+    </script>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-banner">
+            <img src="{{ url_for('static', filename='CubieIcon.png') }}" alt="Cubie Icon" id="cubieIcon" />
+            <span>Cubie</span>
+        </div>
+        <div id="chatbox" class="chatbox">
+        </div>
+        <!--<div class="chatbox-wrapper">
+            <img src="path/to/your-icon.png" alt="Icon" class="icon">
+            <div id="chatbox"></div>
+          </div>-->
+        <div class="floating-buttons" id="floating-buttons">
+             Buttons will be added here using JavaScript 
+        </div>
+        <div id="userInput">
+            <input id="textInput" type="text" name="msg" placeholder="Type your message here...">
+            <button id="buttonInput">Send</button>
+        </div>
+    </div>
+</body>
+</html>
+
